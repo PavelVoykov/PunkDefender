@@ -87,11 +87,12 @@ function preload() {
     
     enemy = Game.add.group()
     
-    for (let i = 0; i < 25; i++){
+    for (let i = 0; i < 5; i++){
         enemy.create(Game.rnd.integerInRange(2, 199)*32, Game.rnd.integerInRange(m, m+47)*32, 'slime')
-        // enemy.animations.add('', [], 10, true).play()
-        // enemy.scale.setTo(4)
     }
+    enemy.forEach(function(vrag){
+        vrag.scale.setTo(2)
+    })
     
     
     
@@ -292,11 +293,10 @@ function preload() {
             s.body.offset.y = 5
         })
         //Game.debug.body(p)
-        p.body.immovable = true
+
         Game.physics.arcade.collide(p, tree)
         Game.physics.arcade.collide(p, fance)
-        Game.physics.arcade.collide(p, rock)
-        Game.physics.arcade.collide(p, enemy)
+        Game.physics.arcade.collide(p, rock)    
         Game.physics.arcade.collide(tree, tree, treeColl)
         Game.physics.arcade.collide(tree, rock, treeColl)
         Game.physics.arcade.collide(rock, rock, treeColl)
@@ -305,7 +305,10 @@ function preload() {
         Game.physics.arcade.collide(dropstone, tree, treeColl)
     
         enemy.forEach(function(vrag){
-            if(vrag.x > p.x){
+            vrag.animations.add('', [], 10, true).play()
+            if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 300)
+            
+            if(enemy.getAt(enemy.getIndex(vrag)).x > p.x){
             
                 vrag.scale.setTo(turncounter,2)
                 if(turncounter > -2){
@@ -365,10 +368,15 @@ function preload() {
         flag = flag ? false : true
         if(p.animations.paused){
             p.animations.paused = false
-            enemy.animations.paused = false
+            enemy.forEach(function(enemy){
+                enemy.animations.paused = false
+            })
+            
         }else{
             p.animations.paused = true
-            enemy.animations.paused = true
+            enemy.forEach(function(enemy){
+                enemy.animations.paused = true
+            })
         }
         
         
