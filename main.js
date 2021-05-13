@@ -1,10 +1,7 @@
-const Game = new Phaser.Game(1152, 608, Phaser.AUTO, 'game-canvas', {preload, create, update
-})
+const Game = new Phaser.Game(1152, 608, Phaser.AUTO, 'game-canvas', {preload, create, update})
 Game.state.add('GO', GOver, false)
-Game.state.add('DiscoGround', Disco, false)
-
 function preload() {
-    Game.load.spritesheet('player', 'SwordAttack.png', 896/8, 960/6)
+    Game.load.spritesheet('player', 'WalkAnim-768x22 128x1.png', 384/8, 128)
     Game.load.tilemap('map', "BigMap.json", null, Phaser.Tilemap.TILED_JSON)
     Game.load.image('Sprite-0003', 'Sprite-0003.png')
     Game.load.spritesheet('tree', 'tree.png', 192/4, 64)
@@ -20,7 +17,7 @@ function preload() {
     Game.load.image('OptionsX', 'OptionsX.png')
     Game.load.spritesheet('slime', 'Baba.png', 224/7, 32)
     Game.load.image('h', 'health.png')
-    Game.load.image('s', 'Stamina.png')
+    Game.load.image('hem', 'enmhb.png')
     }
     let music 
     let stoneIndexCheck = 0
@@ -50,7 +47,9 @@ function preload() {
     let options
     let enemy
     let hb
-    let sb
+    let emhit
+    let enIndexCheck = 0
+    let enhbar = [100, 100, 100, 100, 100]
     let playerStats = {
         flagD: true,
         health: 100,
@@ -63,15 +62,16 @@ function preload() {
     }
     
     let faceTo = 'right'
-    
+    let enemyHb
     function create() {
-        
-        
-        
+            
+       
+       
         
         music = Game.add.audio('Music1')
-        music.loop = true
-       // music.play()
+        music.loop = true 
+        music.volume= 0.65
+        music.play()
         
         
         
@@ -88,10 +88,6 @@ function preload() {
     
     hb = Game.add.image(p.x - 45, p.y - 60, 'h')
     hb.scale.setTo(5, 1)
-    
-    
-    sb = Game.add.image(p.x - 45, p.y - 76, 's')
-    sb.scale.setTo(5, 1)
 
 
     enemy = Game.add.group()
@@ -101,9 +97,13 @@ function preload() {
     }
     enemy.forEach(function(vrag){
         vrag.scale.setTo(2)
+        
     })
-    
-    
+      
+    enemyHb = Game.add.group()
+    for(let g=0; g<5; g++){
+        enemyHb.create(enemy.getAt(g).x - 45, enemy.getAt(g).y - 76, 'hem')
+    }
     
     
     
@@ -146,6 +146,8 @@ function preload() {
     let fance
     let flag = true
     
+
+
     function mapC(){
         map = Game.add.tilemap('map')
         map.addTilesetImage('Sprite-0003')
@@ -279,9 +281,7 @@ function preload() {
         hb.scale.setTo(playerStats.health/20, 1)
         hb.x = p.x - 45
         hb.y = p.y - 60
-        sb.scale.setTo(playerStats.stamina/20, 1)
-        sb.x = p.x - 45
-        sb.y = p.y - 76
+    
     
         p.body.setSize(30,32)
         p.body.offset.y = 48*2
@@ -314,9 +314,11 @@ function preload() {
         Game.physics.arcade.collide(dropstone, dropstone, treeColl)
         Game.physics.arcade.collide(dropstone, rock, treeColl)
         Game.physics.arcade.collide(dropstone, tree, treeColl)
-    
+        enemyHealth()
         enemy.forEach(function(vrag){
             vrag.animations.add('', [], 10, true).play()
+            vrag.inputEnabled = true;
+            vrag.events.onInputDown.add(enemyTakeh, Game);
             if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 300)
             
             if(enemy.getAt(enemy.getIndex(vrag)).x > p.x){
@@ -331,7 +333,7 @@ function preload() {
                     turncounter +=0.1
                 }
             }
-            if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 100 && playerStats.flagD == true){
+            if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 100 && playerStats.flagD == true && flag){
                 playerStats.health -= 10
                 console.log(playerStats.health)
                 playerStats.flagD = false
@@ -340,7 +342,10 @@ function preload() {
         })
     
     
-        
+        if(Game.input.keyboard.isDown(Phaser.Keyboard.X)){ //Наляво
+            console.log("here")
+            
+        }
     
     
         MoveP()
@@ -363,10 +368,7 @@ function preload() {
     
     
     function regen(){
-        if(playerStats.stamina < 100){
-           playerStats.stamina++ 
-        }
-        
+        playerStats.stamina++
         
     }
     function TakeDamage(){
@@ -445,7 +447,7 @@ function preload() {
                     p.animations.play("a");
                     p.body.velocity.y = -270
                     p.body.velocity.x = 0
-                    playerStats.stamina -= 2
+                    playerStats.stamina--
                 }
                    
                 
@@ -457,7 +459,7 @@ function preload() {
                                 p.animations.play("c");
                                 p.body.velocity.y = 270
                                 p.body.velocity.x = 0
-                                playerStats.stamina -= 2
+                                playerStats.stamina--
                             }
                     
                 
@@ -472,7 +474,7 @@ function preload() {
                             p.animations.play("b");
                             p.scale.setTo(-2/3,2/3)
                             p.body.velocity.x = -270
-                            playerStats.stamina -= 2
+                            playerStats.stamina--
                     
                 }
              }else if(Game.input.keyboard.isDown(Phaser.Keyboard.D)){ //Надясно
@@ -485,7 +487,7 @@ function preload() {
                     p.animations.play("b");
                     p.scale.setTo(2/3)
                     p.body.velocity.x = 270
-                    playerStats.stamina -= 2
+                    playerStats.stamina--
                 }
         
                
@@ -598,4 +600,34 @@ function preload() {
             textS.text = playerStats.stoneCount
         }
     }
+
+   function enemyHealth(){
+       enemyHb.forEach(function(enhb){
+            enhb.x = enemy.getAt(enemyHb.getIndex(enhb)).x
+            enhb.y = enemy.getAt(enemyHb.getIndex(enhb)).y - 16
+            enhb.scale.setTo(enhbar[enemyHb.getIndex(enhb)]/20*(turncounter/2), 1)
+        
+       })
+   }
+function enemyTakeh(hp) {
+if(enhbar[enemy.getIndex(hp)]<=0){
+    enemy.getAt(enemy.getIndex(hp)).destroy()
+
+
+}
+if(Phaser.Math.distance(hp.x, hp.y, p.x, p.y)<200){
+   enhbar[enemy.getIndex(hp)] -= 10
+
+}
+console.log('1')
+
+}
+
+
+
+    
+    
+
+
+
     
