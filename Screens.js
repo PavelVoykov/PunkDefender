@@ -14,3 +14,26 @@ const GOver = {
     }
 
 }
+const Disco = {
+preload: function(){
+    Game.load.tilemap('disco', 'DISCO.json', null, Phaser.Tilemap.TILED_JSON)
+    Game.load.image('tiledisco', 'tiledisco.png')
+    Game.load.image('neshto', 'tiledisco.png')
+    Game.load.spritesheet('igra4', 'WalkAnim-768x22 128x1.png', 384/8, 128)
+
+},
+Dmap:0,
+Layer1:0,
+Layer2:0,
+p:0,
+create: function(){
+
+    this.Dmap = Game.add.tilemap('disco')
+    this.Dmap.addTilesetImage('tiledisco')
+    this.Layer1 = this.Dmap.createLayer(0)
+    this.Layer2 = this.Dmap.createLayer(1)
+
+
+    this.p = Game.add.sprite(100, 100, 'igra4')
+}
+}
