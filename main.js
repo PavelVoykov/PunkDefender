@@ -1,8 +1,7 @@
-const Game = new Phaser.Game(1152, 608, Phaser.AUTO, 'game-canvas', {preload, create, update
-})
+const Game = new Phaser.Game(1152, 608, Phaser.AUTO, 'game-canvas', {preload, create, update})
 Game.state.add('GO', GOver, false)
-Game.state.add('DiscoGround', Disco, false)
-
+Game.state.add('Finish', WinScreen, false)
+//Game.state.add('DiscoGround', Disco, false)
 function preload() {
     Game.load.spritesheet('player', 'SwordAttack.png', 896/8, 960/6)
     Game.load.tilemap('map', "BigMap.json", null, Phaser.Tilemap.TILED_JSON)
@@ -21,6 +20,9 @@ function preload() {
     Game.load.spritesheet('slime', 'Baba.png', 224/7, 32)
     Game.load.image('h', 'health.png')
     Game.load.image('s', 'Stamina.png')
+    Game.load.image('h', 'health.png')
+    Game.load.image('hem', 'enmhb.png')
+    Game.load.spritesheet('BTree', 'BigTree.png', 3200/5, 800)
     }
     let music 
     let stoneIndexCheck = 0
@@ -29,6 +31,10 @@ function preload() {
     let a1
     let a2
     let a3
+    let a4
+    let a5
+    let a6
+    let a7
     let map
     let layer
     let m = 2
@@ -49,8 +55,12 @@ function preload() {
     let IronText
     let options
     let enemy
-    let hb
+
     let sb
+    let hb
+    let emhit
+    let enIndexCheck = 0
+    let enhbar = [100, 100, 100, 100, 100]
     let playerStats = {
         flagD: true,
         health: 100,
@@ -58,20 +68,23 @@ function preload() {
         stoneCount: 0,
         woodT: 0,
         pickaxe: 0, 
-        axe: 0,
+        axe: 1,
         ironCount: 0
     }
+    let BigestTreeHits = 50
+    let BigestTree
     
     let faceTo = 'right'
-    
+    let enemyHb
     function create() {
-        
-        
-        
+            
+       
+       
         
         music = Game.add.audio('Music1')
-        music.loop = true
-       // music.play()
+        music.loop = true 
+        music.volume= 0.65
+        music.play()
         
         
         
@@ -83,7 +96,8 @@ function preload() {
     trees()
     Rocks()
     Stones()
-    
+    BigestTree = Game.add.sprite(100*32, 100*32, 'BTree')
+    BigestTree.anchor.setTo(0.5)
     playerC()
     
     hb = Game.add.image(p.x - 45, p.y - 60, 'h')
@@ -93,7 +107,6 @@ function preload() {
     sb = Game.add.image(p.x - 45, p.y - 76, 's')
     sb.scale.setTo(5, 1)
 
-
     enemy = Game.add.group()
     
     for (let i = 0; i < 5; i++){
@@ -101,19 +114,25 @@ function preload() {
     }
     enemy.forEach(function(vrag){
         vrag.scale.setTo(2)
+        
     })
-    
-    
+      
+    enemyHb = Game.add.group()
+    for(let g=0; g<5; g++){
+        enemyHb.create(enemy.getAt(g).x - 45, enemy.getAt(g).y - 76, 'hem')
+    }
     
     
     
     Game.physics.startSystem(Phaser.Physics.ARCADE);
-    Game.physics.enable([p, enemy], Phaser.Physics.ARCADE);
+    Game.physics.enable([p, enemy, BigestTree], Phaser.Physics.ARCADE);
     p.body.collideWorldBounds = true
     Game.camera.follow(p, Phaser.Camera.FOLLOW_PLATFORMER, 1, 1)
     
     iBarCreate()
-    
+    BigestTree.body.immovable = true 
+    BigestTree.inputEnabled = true
+    BigestTree.events.onInputDown.add(DamageBigTree, Game)
     wood = Game.add.sprite(32*8+16, Game.height-48, 'wood')
     stone = Game.add.sprite(32*8+16+64, Game.height-48, 'stone')
     stone.anchor.y = 0.3
@@ -181,6 +200,11 @@ function preload() {
         a1 = p.animations.add("a", [16,17,18,19,20,21,22,23], 10, true)
         a2 = p.animations.add("b", [0,1,2,3,4,5,6,7], 10, true)
         a3 = p.animations.add("c", [8,9,10,11,12,13,14,15], 10, true)
+        a4 = p.animations.add("e", [24,25,26,27,28], 15, false)
+        a5 = p.animations.add("f", [32,33,34,35,36], 15, false)
+        a6 = p.animations.add("g", [40,41,42,43,44], 15, false)
+        a7 = p.animations.add("h", [48,49,50,51,52], 15, false)
+
         p.scale.setTo(2/3)
         p.anchor.setTo(0.5)
         
@@ -269,6 +293,7 @@ function preload() {
         });
     }
     let turncounter = 1
+        
     
     function update(){
     if(playerStats.health <= 0){
@@ -282,7 +307,17 @@ function preload() {
         sb.scale.setTo(playerStats.stamina/20, 1)
         sb.x = p.x - 45
         sb.y = p.y - 76
-    
+        
+        
+        
+        
+    if(BigestTree){
+        Game.debug.body(BigestTree)
+         BigestTree.body.setSize(389, 550)
+            BigestTree.body.offset.y = 128
+            BigestTree.body.offset.x = 32
+    }
+       // Game.debug.body(p)
         p.body.setSize(30,32)
         p.body.offset.y = 48*2
         tree.forEach(function(t){
@@ -303,20 +338,29 @@ function preload() {
             s.body.offset.x = 3
             s.body.offset.y = 5
         })
-        //Game.debug.body(p)
+        
 
         Game.physics.arcade.collide(p, tree)
         Game.physics.arcade.collide(p, fance)
         Game.physics.arcade.collide(p, rock)    
+        Game.physics.arcade.collide(p, BigestTree) 
         Game.physics.arcade.collide(tree, tree, treeColl)
+        Game.physics.arcade.collide(tree, BigestTree, treeColl)
         Game.physics.arcade.collide(tree, rock, treeColl)
         Game.physics.arcade.collide(rock, rock, treeColl)
+        Game.physics.arcade.collide(rock, BigestTree, treeColl)
         Game.physics.arcade.collide(dropstone, dropstone, treeColl)
+        Game.physics.arcade.collide(dropstone, BigestTree, treeColl)
         Game.physics.arcade.collide(dropstone, rock, treeColl)
         Game.physics.arcade.collide(dropstone, tree, treeColl)
-    
+
+        
+
+        enemyHealth()
         enemy.forEach(function(vrag){
             vrag.animations.add('', [], 10, true).play()
+            vrag.inputEnabled = true;
+            vrag.events.onInputDown.add(enemyTakeh, Game);
             if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 300)
             
             if(enemy.getAt(enemy.getIndex(vrag)).x > p.x){
@@ -331,7 +375,7 @@ function preload() {
                     turncounter +=0.1
                 }
             }
-            if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 100 && playerStats.flagD == true){
+            if(Phaser.Math.distance(vrag.x, vrag.y, p.x, p.y) < 100 && playerStats.flagD == true && flag){
                 playerStats.health -= 10
                 console.log(playerStats.health)
                 playerStats.flagD = false
@@ -340,7 +384,10 @@ function preload() {
         })
     
     
-        
+        if(Game.input.keyboard.isDown(Phaser.Keyboard.X)){ //Наляво
+            console.log("here")
+            
+        }
     
     
         MoveP()
@@ -360,15 +407,30 @@ function preload() {
         AttackPlayer()
         Game.time.events.add(Phaser.Timer.SECOND * 0.5, regen, Game);
     }
+    function DamageBigTree(){
+        if(playerStats.axe > 0){
+        BigestTreeHits--
+        if(BigestTreeHits<=0){
+            BigestTree.animations.add('', [0, 1, 2, 3, 4], 10, false).play()
+            Game.time.events.add(Phaser.Timer.SECOND * 1, DestroyBT, Game);
+
+        }
+    }
+    }
+    function DestroyBT(){
+        BigestTree.x = 10000
+        music.stop()
+        Game.state.start('Finish')
+    }
     
     
     function regen(){
         if(playerStats.stamina < 100){
            playerStats.stamina++ 
         }
-        
-        
     }
+        
+    
     function TakeDamage(){
         playerStats.flagD = true
     }
@@ -410,6 +472,7 @@ function preload() {
     }
     function MoveP(){
         if(flag){
+            
             if(Game.input.keyboard.isDown(Phaser.Keyboard.W) && Game.input.keyboard.isDown(Phaser.Keyboard.A)){// Диагонал северозапад
                 p.animations.play("b");
                 p.scale.setTo(-2/3,2/3)
@@ -492,17 +555,19 @@ function preload() {
             }else{
                 p.body.velocity.y = 0
                 p.body.velocity.x = 0
-                p.animations.stop()
+                
                 }
         }
     }
+
     function treeColl(_, Tree){
         Tree.destroy()
     }
     function listener(_tree){
+
         if(Phaser.Math.distance(_tree.x, _tree.y , p.x, p.y) < 100){
+            a7.play()
            hitpertree ++
-           
            
             if(treeIndexCheck != tree.getIndex(_tree)){
                 hitpertree = 0
@@ -538,7 +603,7 @@ function preload() {
                     playerStats.pickaxe++
                     playerStats.stoneCount -= 3
                     playerStats.woodT -= 5
-                    textS.text = stoneCount
+                    textS.text = playerStats.stoneCount
                     text.text = playerStats.woodT
                     tool.getAt(0).fixedToCamera = false
                     tool.getAt(0).x = 272 + 192
@@ -566,6 +631,7 @@ function preload() {
     function Slistener(_stone){
         if(Phaser.Math.distance(_stone.x, _stone.y , p.x, p.y) < 100){
         if(playerStats.pickaxe>0){
+            a4.play()
         hitpertree ++
         if(hitpertree < 4){
             _stone.animations.add('', [hitpertree], 10, false).play()
@@ -598,4 +664,26 @@ function preload() {
             textS.text = playerStats.stoneCount
         }
     }
-    
+
+   function enemyHealth(){
+       enemyHb.forEach(function(enhb){
+            enhb.x = enemy.getAt(enemyHb.getIndex(enhb)).x
+            enhb.y = enemy.getAt(enemyHb.getIndex(enhb)).y - 16
+            enhb.scale.setTo(enhbar[enemyHb.getIndex(enhb)]/20*(turncounter/2), 1)
+        
+       })
+   }
+function enemyTakeh(hp) {
+    p.animations.play('g')
+if(enhbar[enemy.getIndex(hp)]<=0){
+    enemy.getAt(enemy.getIndex(hp)).destroy()
+
+
+}
+if(Phaser.Math.distance(hp.x, hp.y, p.x, p.y)<200){
+   enhbar[enemy.getIndex(hp)] -= 10
+
+}
+console.log('1')
+
+}
