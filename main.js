@@ -1,7 +1,7 @@
 const Game = new Phaser.Game(1152, 608, Phaser.AUTO, 'game-canvas', {preload, create, update})
 Game.state.add('GO', GOver, false)
 Game.state.add('Finish', WinScreen, false)
-Game.state.add('DiscoGround', Disco, true)
+Game.state.add('DiscoGround', Disco, false)
 function preload() {
     Game.load.spritesheet('player', 'SwordAttack.png', 896/8, 960/6)
     Game.load.tilemap('map', "BigMap.json", null, Phaser.Tilemap.TILED_JSON)
@@ -419,7 +419,7 @@ function preload() {
     function DestroyBT(){
         BigestTree.x = 10000
         music.stop()
-        Game.state.start('Finish')
+        Game.state.start('DiscoGround')
     }
     
     

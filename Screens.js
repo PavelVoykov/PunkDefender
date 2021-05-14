@@ -51,6 +51,7 @@ preload: function(){
     Game.load.image('h', 'health.png')
     Game.load.image('s', 'Stamina.png')
     Game.load.image('hem', 'enmhb.png')
+    Game.load.audio('M', 'Vov.wav')
 
 },
 Dmap:0,
@@ -63,6 +64,7 @@ a3:0,
 a6:0,
 a:0,
 b:0,
+music:0,
 ehealth:100,
 playerStats:{
     health:100,
@@ -71,7 +73,11 @@ playerStats:{
 },
 enemy:0,
 create: function(){
-
+    music = Game.add.audio('M')
+    music.loop = true
+    music.volume = 0.65
+    music.play()
+    
     this.Dmap = Game.add.tilemap('disco')
     this.Dmap.addTilesetImage('tiledisco')
     this.Layer1 = this.Dmap.createLayer(0)
