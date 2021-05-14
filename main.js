@@ -1,7 +1,7 @@
 const Game = new Phaser.Game(1152, 608, Phaser.AUTO, 'game-canvas', {preload, create, update})
 Game.state.add('GO', GOver, false)
 Game.state.add('Finish', WinScreen, false)
-//Game.state.add('DiscoGround', Disco, false)
+Game.state.add('DiscoGround', Disco, true)
 function preload() {
     Game.load.spritesheet('player', 'SwordAttack.png', 896/8, 960/6)
     Game.load.tilemap('map', "BigMap.json", null, Phaser.Tilemap.TILED_JSON)
@@ -20,7 +20,6 @@ function preload() {
     Game.load.spritesheet('slime', 'Baba.png', 224/7, 32)
     Game.load.image('h', 'health.png')
     Game.load.image('s', 'Stamina.png')
-    Game.load.image('h', 'health.png')
     Game.load.image('hem', 'enmhb.png')
     Game.load.spritesheet('BTree', 'BigTree.png', 3200/5, 800)
     }
@@ -555,7 +554,9 @@ function preload() {
             }else{
                 p.body.velocity.y = 0
                 p.body.velocity.x = 0
-                
+                a1.stop()
+                a2.stop()
+                a3.stop()
                 }
         }
     }
